@@ -2,17 +2,6 @@
 
 # This script executes the install step when running under travis-ci
 
-#if cygwin, check path
-case ${MACHTYPE} in
-	*cygwin*) GROK_CI_IS_CYGWIN=1;;
-	*) ;;
-esac
-
-if [ "${GROK_CI_IS_CYGWIN:-}" == "1" ]; then
-	# PATH is not yet set up
-	export PATH=$PATH:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
-fi
-
 # Set-up some error handling
 set -o nounset   ## set -u : exit the script if you try to use an uninitialised variable
 set -o errexit   ## set -e : exit the script if any statement returns a non-true return value

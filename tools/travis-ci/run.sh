@@ -2,12 +2,6 @@
 
 # This script executes the script step when running under travis-ci
 
-#if cygwin, check path
-case ${MACHTYPE} in
-	*cygwin*) GROK_CI_IS_CYGWIN=1;;
-	*) ;;
-esac
-
 # Hack for appveyor to get GNU find in path before windows one.
 export PATH=$(dirname ${BASH}):$PATH
 
@@ -18,11 +12,7 @@ set -o pipefail  ## Fail on error in pipe
 
 function grkpath ()
 {
-	if [ "${GROK_CI_IS_CYGWIN:-}" == "1" ]; then
-		cygpath $1 "$2"
-	else
-		echo "$2"
-	fi
+	echo "$2"
 }
 
 if [ "${GROK_CI_CXX:-}" != "" ]; then
@@ -80,16 +70,24 @@ if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
 	GROK_CXX_VERSION=xcode${GROK_CXX_VERSION:6}
 elif [ "${TRAVIS_OS_NAME}" == "linux" ]; then
 	GROK_OS_NAME=linux
-	
-	# We need a newer version of cmake than travis-ci provides
-	wget --no-check-certificate -qO - https://cmake.org/files/v3.17/cmake-3.17.0-Linux-x86_64.tar.gz | tar -xz
-	# copy to a directory that will not changed every version
-	mv cmake-3.17.0-Linux-x86_64 cmake-install
-		
 	if which lsb_release > /dev/null; then
 		GROK_OS_NAME=$(lsb_release -si)$(lsb_release -sr | sed 's/\([^0-9]*\.[0-9]*\).*/\1/')
 	fi
-	sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-10 /usr/bin/g++
+
+	if  [ "${TRAVIS_CPU_ARCH}" == "amd64" ]; then	
+		# We need a newer version of cmake than travis-ci provides
+		wget --no-check-certificate -qO - https://cmake.org/files/v3.17/cmake-3.17.0-Linux-x86_64.tar.gz | tar -xz
+		# copy to a directory that will not changed every version
+		mv cmake-3.17.0-Linux-x86_64 cmake-install
+		sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-10 /usr/bin/g++
+	elif [ "${TRAVIS_CPU_ARCH}" == "arm64" ]; then
+		sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+		sudo apt-get update
+		sudo snap install cmake --classic
+		export PATH=/snap/bin:$PATH
+		sudo apt install gcc-9 g++-9
+		sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 800 --slave /usr/bin/g++ g++ /usr/bin/g++-9
+	fi
 	g++ --version
 	if [ -z "${CXX##*g++*}" ]; then
 		GROK_CXX_VERSION=$(${CXX} --version | head -1 | sed 's/.*\ \([0-9.]*[0-9]\)/\1/')

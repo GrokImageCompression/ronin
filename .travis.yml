@@ -26,6 +26,18 @@ matrix:
           - ubuntu-toolchain-r-test
         packages:
           - g++-10
+  - os: linux
+    arch: arm64
+    dist: focal 
+    sudo: required
+    compiler: g++
+    env: 
+      - GROK_CI_BUILD_CONFIGURATION=Release
+    addons:
+    addons:
+      apt:
+        packages:
+        - g++
 before_install:
     - eval "${MATRIX_EVAL}"
 install:
