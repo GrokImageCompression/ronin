@@ -38,6 +38,7 @@ matrix:
       apt:
         packages:
         - g++
+        - cmake
 before_install:
     - eval "${MATRIX_EVAL}"
 install:

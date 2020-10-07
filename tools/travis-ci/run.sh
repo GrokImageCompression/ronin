@@ -80,13 +80,6 @@ elif [ "${TRAVIS_OS_NAME}" == "linux" ]; then
 		# copy to a directory that will not changed every version
 		mv cmake-3.17.0-Linux-x86_64 cmake-install
 		sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-10 /usr/bin/g++
-	elif [ "${TRAVIS_CPU_ARCH}" == "arm64" ]; then
-		sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-		sudo apt-get update
-		sudo snap install cmake --classic
-		export PATH=/snap/bin:$PATH
-		sudo apt install gcc-9 g++-9
-		sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 800 --slave /usr/bin/g++ g++ /usr/bin/g++-9
 	fi
 	g++ --version
 	if [ -z "${CXX##*g++*}" ]; then
